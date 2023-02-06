@@ -32,16 +32,7 @@ class Model:
         self.predict_val = None
         self.metric_result = None
         self.modelinstance = None
-        # # self.model_param = None
 
-        # # About Model
-        # self.model_type = self.config["model"]
-        # ## Set Model（モデルごとのコンストラクタの作成）
-        # if (self.model_type == "LinearReression"):
-        #     self.model = LinearRegression()
-        # else:
-        #     pass
-    
     def set_data(self, _data, _train_index, _val_index, _submit_index):
         pass
 

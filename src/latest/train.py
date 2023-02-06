@@ -98,7 +98,7 @@ for cfips in tqdm(config.keys()):
 # --- Post ---
 # loss.csv
 with open(loss_filepath, mode="w") as f:
-    f.write("cfips, Loss\n")
+    f.write("cfips,val_loss,sub_loss\n")
     for cfips, val_loss, sub_loss in zip(cfips_list, val_loss_list, sub_loss_list):
         f.write(f"{cfips}, {val_loss}, {sub_loss}\n")
 # predict.csv (いいやり方ではないと思う。。。とりあえずバリデーション期間が変わってもできるように)
