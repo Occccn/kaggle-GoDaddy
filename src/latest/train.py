@@ -66,7 +66,8 @@ os.makedirs(save_dirpath, exist_ok=True)
 # --- Main ---
 #群ごとに予測を実施
 cfips_list = []
-loss_list = []
+val_loss_list = []
+sub_loss_list = []
 inference_dict ={}
 for cfips in tqdm(config.keys()):
     # 郡ごとにデータの抽出
@@ -81,14 +82,16 @@ for cfips in tqdm(config.keys()):
     # Note: CVをループに回すのは、一旦保留。
     train_index, val_index, submit_index = cv.divide_data()
     # Learning & Predict
-    learning.set_data(train_county, train_index, val_index)
-    learning.run()
-    metric_result = learning.get_metric_result()
-    predict = learning.get_predict_val()
+    learning.model.set_data(train_county, train_index, val_index, submit_index)
+    learning.model.run()
+    metric_sub = learning.model.get_metric_sub()
+    metric_val = learning.model.get_metric_val()
+    predict = learning.model.get_predict_val()
 
     # Data Storage
     cfips_list.append(cfips)
-    loss_list.append(metric_result)
+    val_loss_list.append(metric_val)
+    sub_loss_list.append(metric_sub)
     inference_dict[cfips] = predict
     
 
@@ -96,8 +99,8 @@ for cfips in tqdm(config.keys()):
 # loss.csv
 with open(loss_filepath, mode="w") as f:
     f.write("cfips, Loss\n")
-    for cfips, loss in zip(cfips_list, loss_list):
-        f.write(f"{cfips}, {loss}\n")
+    for cfips, val_loss, sub_loss in zip(cfips_list, val_loss_list, sub_loss_list):
+        f.write(f"{cfips}, {val_loss}, {sub_loss}\n")
 # predict.csv (いいやり方ではないと思う。。。とりあえずバリデーション期間が変わってもできるように)
 inference_df = pd.DataFrame.from_dict(inference_dict)
 inference_df.to_csv(inferenced_filepath)
