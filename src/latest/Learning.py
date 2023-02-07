@@ -30,7 +30,7 @@ class Model:
         self.val_x = None
         self.val_y = None
         self.predict_val = None
-        self.metric_result = None
+        self.metric_val = None
         self.modelinstance = None
 
     def set_data(self, _data, _train_index, _val_index, _submit_index):
@@ -49,12 +49,15 @@ class Model:
     
     def get_predict_val(self):
         return self.predict_val
+    
+    def get_predict_sub(self):
+        return self.predict_sub
 
     def get_metric_val(self):
-        return self.metric_result
+        return self.metric_val
     
     def get_metric_sub(self):
-        return self.metric_result
+        return self.metric_sub
 
     # 以下、メソッドを追加する
     # ・学習時の過程を振り返られるようにLossを保存
@@ -64,7 +67,7 @@ class Model:
 class LinearRegressor(Model):
     def __init__(self, _cfips_config, _metric):
         super().__init__( _cfips_config, _metric) 
-        self.modelinstance = LinearRegression()
+        self.model_api = LinearRegression()
         
     def set_data(self, _data, _train_index, _val_index, _submit_index):
         self.data = _data
@@ -72,24 +75,25 @@ class LinearRegressor(Model):
         train = self.data.query("index in @_train_index")
         val = self.data.query("index in @_val_index")
         sub = self.data.query("index in @_submit_index")
-        
         self.train_y = train["microbusiness_density"].values
         self.val_y = val["microbusiness_density"].values
         self.sub_y = sub["microbusiness_density"].values
         self.train_x = np.arange(len(train)).reshape((-1, 1))
-        self.val_x = np.arange(len(val)).reshape((-1, 1))
-        self.sub_x = np.arange(len(sub)).reshape((-1, 1))
+        self.val_x = np.arange(1 + len(val)).reshape((-1, 1))
+        self.sub_x = np.arange(len(self.val_x) + len(sub)).reshape((-1, 1))
+
         
     def run(self):
         # 学習の実行
         # ここに分岐をつけて学習をそれぞれ学習
-        self.modelinstance.fit(self.train_x, self.train_y)
-        self.predict_val = self.modelinstance.predict(self.val_x)
-        self.predict_sub = self.modelinstance.predict(self.sub_x)
+        self.model_api.fit(self.train_x, self.train_y)
+        predict = self.model_api.predict(self.sub_x)
+        shift = self.train_y[-1] - predict[0]
+        self.predict_val = predict[1:len(self.val_x)] + shift
+        self.predict_sub = predict[len(self.val_x):len(self.sub_x)] + shift
         self.metric_val = self.metric(self.predict_val, self.val_y)
         self.metric_sub = self.metric(self.predict_sub, self.sub_y)
-        
     def predict(self, _input): # 使わないかもだけど
-        predict = self.modelinstance.predict(_input)
+        predict = self.model_api.predict(_input)
         return predict
     

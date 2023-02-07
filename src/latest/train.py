@@ -86,15 +86,14 @@ for cfips in tqdm(config.keys()):
     learning.model.run()
     metric_sub = learning.model.get_metric_sub()
     metric_val = learning.model.get_metric_val()
-    predict = learning.model.get_predict_val()
-
+    predict_val = learning.model.get_predict_val()
+    predict_sub = learning.model.get_predict_sub()
+    predict = np.r_[predict_val, predict_sub]
     # Data Storage
     cfips_list.append(cfips)
     val_loss_list.append(metric_val)
     sub_loss_list.append(metric_sub)
     inference_dict[cfips] = predict
-    
-
 # --- Post ---
 # loss.csv
 with open(loss_filepath, mode="w") as f:
