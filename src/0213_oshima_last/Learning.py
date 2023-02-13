@@ -17,6 +17,8 @@ class Learning:
     def __init__(self, _cfips_config, _metric):
         if (_cfips_config["model"]== "LinearReression"):
             self.model = LinearRegressor(_cfips_config, _metric)
+        elif (_cfips_config["model"]== "LastModel"):
+            self.model = LastModel(_cfips_config, _metric)
 
 
 
