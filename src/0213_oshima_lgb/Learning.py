@@ -100,3 +100,34 @@ class LinearRegressor(Model):
         return predict
     
     
+class LastModel(Model):
+    def __init__(self, _cfips_config, _metric):
+        super().__init__( _cfips_config, _metric) 
+        
+    def set_data(self, _data, _train_index, _val_index, _submit_index):
+        self.data = _data
+        
+        train = self.data.query("index in @_train_index")
+        val = self.data.query("index in @_val_index")
+        sub = self.data.query("index in @_submit_index")
+        self.train_y = train["microbusiness_density"].values
+        self.val_y = val["microbusiness_density"].values
+        self.sub_y = sub["microbusiness_density"].values
+        self.train_x = np.arange(len(train)).reshape((-1, 1))
+        self.val_x = np.arange(1 + len(val)).reshape((-1, 1))
+        self.sub_x = np.arange(len(self.val_x) + len(sub)).reshape((-1, 1))
+
+        
+    def run(self):
+        # 学習の実行
+        # ここに分岐をつけて学習をそれぞれ学習
+
+        lastval = self.train_y[-1]
+        self.predict_val = [lastval for _ in range(len(self.val_y))]
+        self.predict_sub = [lastval for _ in range(len(self.sub_y))]
+        self.metric_val = self.metric(self.predict_val, self.val_y)
+        self.metric_sub = self.metric(self.predict_sub, self.sub_y)
+    def predict(self, _input): # 使わないかもだけど
+        pass
+    
+    
