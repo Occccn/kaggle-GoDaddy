@@ -3,37 +3,13 @@ import lightgbm as lgb
 import numpy as np
 
 class LGBModel:
-    def __init__(self):
-        self.data          = None
-        self.train_x       = None
-        self.train_y       = None
-        self.val_x         = None
-        self.val_y         = None
-        self.sub_x         = None
-        self.sub_y         = None
-        self.predict_val   = None
-        self.metric_val    = None
-        self.modelinstance = None
+    def __init__(self,cfg):
+        self.LGBCFG        = cfg
+        self.LOG_EVAL      = 100
         self.NOT_FEATURES  = ['cfips','first_day_of_month','target','shift_target','microbusiness_density', 'row_id']
-        self.TARGET        = ['target']
+        self.TARGET        = 'target'
         self.DROP_COUNTY   = []
-        self.PARAMS        = {
-                            'objective'        : 'regression', 
-                            'metric'           : 'mae',
-                            'lambda_l1'        : 2,
-                            'lambda_l2'        : 5,
-                            'num_leaves'       : 40,
-                            'learning_rate'    : 0.005,
-                            'max_depth'        : 8,
-                            'min_child_samples': 150,
-                            'force_col_wise'   : True,
-                            'num_iterations'   : 100,
-                        #     'early_stopping_round':100,
-                        #     'boosting' : boosting_type,
-                        #     'feature_fraction': trial.suggest_uniform('feature_fraction', 0.1, 0.4),
-                        #     #'bagging_fraction': trial.suggest_uniform('bagging_fraction', 0.4, 1.0),
-                        #     #'bagging_freq': trial.suggest_int('bagging_freq', 1, 30),
-                        }
+        self.PARAMS        = self.LGBCFG['params']
     def set_data(self, _data):
         self.train = _data
         #学習対象から一部群を除く、「48301」はターゲットがinfとなったため
@@ -54,11 +30,10 @@ class LGBModel:
         diff_feature                               = pd.merge(train_old_gby, train_diff,on = 'cfips')
         diff_feature['diff_1_2']                   = diff_feature['diff']/diff_feature['diff_abs']
         
-        
         ##lag特徴量
         lag_features     = self.train[self.train['first_day_of_month'] >= pd.to_datetime('2021/2/1')]
-        lag_features_col = []
-        for shift_month in range(1,len(lag_features['first_day_of_month'].unique())):
+        lag_features_col =  ['row_id']
+        for shift_month in range(1,13):
             lag_features[f'mb_dens_shift{shift_month}'] = lag_features.groupby(['cfips'])[['microbusiness_density']].shift(shift_month)
             lag_features_col.append(f'mb_dens_shift{shift_month}')
 
@@ -72,7 +47,7 @@ class LGBModel:
         
         #移動平均
         rolling_features     = self.train[self.train['first_day_of_month'] >= pd.to_datetime('2021/2/1')]
-        rolling_features_col = []
+        rolling_features_col = ['row_id']
         for i in range(1,2):
         # for i in range(1,6):
             DAYS_PRED = i+1
@@ -84,7 +59,7 @@ class LGBModel:
                 
         #分散
         std_features     = self.train[self.train['first_day_of_month'] >= pd.to_datetime('2021/2/1')]
-        std_features_col = []
+        std_features_col = ['row_id']
         for i in range(1,2):
         # for i in range(1,6):
             DAYS_PRED = i+1
@@ -98,29 +73,27 @@ class LGBModel:
         target['shift_target'] = target.groupby('cfips')['microbusiness_density'].shift(1)
         target['target']       = target['microbusiness_density']/target['shift_target'] - 1
         target.loc[target['target'] == np.inf, 'target'] = -1
+        
         #各種特徴量をマージ
-        feature_df2                          = pd.merge(feature_df,diff_feature,on = 'cfips')
-        feature_df2[lag_features_col]        = lag_features[lag_features_col].values
-        feature_df3                          = pd.merge(feature_df2,cfips_amount,on = 'cfips')
-        feature_df3[rolling_features_col]    = rolling_features[rolling_features_col].values
-        feature_df3[std_features_col]        = std_features[std_features_col].values
-        feature_df3['target']                = target['target'].values
-        feature_df3['shift_target']          = target['shift_target'].values
-        feature_df3['microbusiness_density'] = target['microbusiness_density'].values
-        self.mart                            = feature_df3[feature_df3['first_day_of_month'] >= pd.to_datetime('2021/3/1')]
-        self.mart['target']                  = self.mart['target'].fillna(0)
-        self.mart['shift_target']            = self.mart['shift_target'].fillna(0)
+        feature_df2               = pd.merge(feature_df,diff_feature,on = 'cfips')
+        feature_df2               = pd.merge(feature_df2,lag_features[lag_features_col],on = 'row_id',how = 'inner')
+        feature_df3               = pd.merge(feature_df2,cfips_amount,on = 'cfips')
+        feature_df3               = pd.merge(feature_df3,rolling_features[rolling_features_col],on = 'row_id',how = 'inner')
+        feature_df3               = pd.merge(feature_df3,std_features[std_features_col],on = 'row_id',how = 'inner')
+        feature_df3               = pd.merge(feature_df3,target[['target','shift_target','microbusiness_density','row_id']] ,on = 'row_id',how = 'inner')
+        self.mart                 = feature_df3[feature_df3['first_day_of_month'] >= pd.to_datetime('2021/3/1')]
+        self.mart['target']       = self.mart['target'].fillna(0)
+        self.mart['shift_target'] = self.mart['shift_target'].fillna(0)
         
     def divide_data(self,date):
         self.mart_train = self.mart[self.mart['first_day_of_month'] < pd.to_datetime(date)]
         self.mart_val   = self.mart[self.mart['first_day_of_month'] == pd.to_datetime(date)]
-        self.mart_sub   = self.mart[self.mart['first_day_of_month'] > pd.to_datetime(date)]
-        
+        self.mart_val.to_csv('before.csv',index = False)
     def train_model(self): 
         #SMAPEでearly stopをかけるように修正
-        dtrain      = lgb.Dataset(self.mart_train.drop(columns = self.NOT_FEATURES), self.mart_train['target'])
-        dvalid      = lgb.Dataset(self.mart_val.drop(columns = self.NOT_FEATURES), self.mart_val['target'])
-        gbm         = lgb.train(self.PARAMS, dtrain, valid_sets=[dvalid],callbacks=[lgb.log_evaluation(100)])
+        dtrain      = lgb.Dataset(self.mart_train.drop(columns = self.NOT_FEATURES), self.mart_train[self.TARGET])
+        dvalid      = lgb.Dataset(self.mart_val.drop(columns = self.NOT_FEATURES), self.mart_val[self.TARGET])
+        gbm         = lgb.train(self.PARAMS, dtrain, valid_sets=[dvalid],callbacks=[lgb.log_evaluation(self.LOG_EVAL)])
         self.preds  = gbm.predict(self.mart_val.drop(columns = self.NOT_FEATURES))
 
     def update_train_data(self):
