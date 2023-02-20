@@ -47,3 +47,20 @@ class CV:
             submit_index = self.train.query("first_day_of_month in @submit_month").index
             
             return train_index, val_index, submit_index
+        
+        elif (self.cv_type == "submit_full"):
+            """
+            全データを学習データとして用いて、予測
+            """
+            # !! データの変更があった際は、参照インデックス要見直し
+            train_month = self.train["first_day_of_month"].values[:-9]  # 2022-09-01が-1までなので(!!データの更新があった際は要確認!!)
+            val_month = self.train["first_day_of_month"].values[-9] # 2022-10-01想定（暫定）
+            submit_month = self.train["first_day_of_month"].values[-8:-5] # 2022-11-01 - 2022-01-01 想定（暫定）
+            
+            train_index = self.train.query("first_day_of_month in @train_month").index
+            val_index = self.train.query("first_day_of_month in @val_month").index
+            submit_index = self.train.query("first_day_of_month in @submit_month").index
+            
+            return train_index, val_index, submit_index
+        
+            
