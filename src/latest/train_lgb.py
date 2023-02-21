@@ -44,8 +44,8 @@ test            = pd.read_csv(test_filepath)
 census_starter  = pd.read_csv(census_starter_filepath)
 submission      = pd.read_csv(submission_filepath)
 
-# test            = pd.merge(test,train[['cfips', 'county', 'state']].drop_duplicates(),how = 'left')
-# train           = pd.concat([train,test]).reset_index(drop = True)
+test            = pd.merge(test,train[['cfips', 'county', 'state']].drop_duplicates(),how = 'left')
+train           = pd.concat([train,test]).reset_index(drop = True)
 
 # 設定ファイル関連
 with open(config_filepath, mode="rt", encoding="utf-8") as f:
@@ -60,15 +60,13 @@ os.makedirs(save_dirpath, exist_ok=True)
 # lgb用設定ファイルを読み込み
 with open('lgbconfig.yml', 'r') as yml:
     LGBCFG = yaml.load(yml, Loader=yaml.SafeLoader)
-VAL_DATE = LGBCFG['val_date']
-SUB_DATE = LGBCFG['sub_date']
+    
 
-print('Start Train')
+VAL_DATE = ['2022/7/1']
+SUB_DATE = ['2022/8/1', '2022/9/1', '2022/10/1']
 model = LGBModel(LGBCFG)
 model.set_data(train)
 model.run(VAL_DATE + SUB_DATE)
-
-
 # --- Post ---
 # loss.csv
 tmp = []
@@ -95,6 +93,19 @@ for cfip in tqdm(train['cfips'].unique()):
 loss = pd.DataFrame(tmp)
 loss.columns = ['cfips', 'val_loss', 'sub_loss']
 loss.to_csv(loss_filepath, index = False)
+
+
+if  LGBCFG['mode'] == 'prediction':
+    VAL_DATE = ['2022/11/1']
+    SUB_DATE = ['2022/12/1', '2023/1/1', '2023/2/1']
+    
+    model = LGBModel(LGBCFG)
+    model.set_data(train)
+    model.run(VAL_DATE + SUB_DATE)
+
+
+
+
 
 
 print('Save inference')

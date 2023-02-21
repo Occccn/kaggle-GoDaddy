@@ -1,6 +1,5 @@
 # Period
-val_date: ['2022/7/1']
-sub_date: ['2022/8/1', '2022/9/1', '2022/10/1']
+mode : 'prediction'
 
 # Params
 params :  {
