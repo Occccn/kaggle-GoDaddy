@@ -30,10 +30,10 @@ min_loss_model['cfips'] = loss['cfips']
 for name in names:
     min_loss_model[f'{name}_sub_loss'] = losses[name][f'{name}_sub_loss']
     if len(min_loss_model.columns) == 2:
-        min_loss_model['min_Loss']         = losses[name][f'{name}_sub_loss']
+        min_loss_model['min_loss']         = losses[name][f'{name}_sub_loss']
         min_loss_model['min_Loss_model']   = name
     else:
-        update_min_loss_idx = min_loss_model['min_Loss']          > min_loss_model[f'{name}_sub_loss'] 
+        update_min_loss_idx = min_loss_model['min_loss']          > min_loss_model[f'{name}_sub_loss'] 
         min_loss_model.loc[update_min_loss_idx, 'min_loss']       = min_loss_model.loc[update_min_loss_idx, f'{name}_sub_loss']
         min_loss_model.loc[update_min_loss_idx, 'min_Loss_model'] = name
         
