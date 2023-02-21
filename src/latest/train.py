@@ -2,8 +2,10 @@
 
 # --- Import Library ---
 # Standard
+import datetime
 import json
 import os
+import shutil
 import sys
 # Third Party
 import numpy as np
@@ -37,6 +39,7 @@ def smape(y_pred, y_true):
 # -------------------------
 
 # --- Set Paramters ---
+# FilePath
 data_folder = "../../data/raw"
 train_filepath = os.path.join(data_folder, "train.csv")
 test_filepath = os.path.join(data_folder, "test.csv")
@@ -46,6 +49,15 @@ config_filepath = "./config.json"
 save_dirpath = "./train"
 loss_filepath = os.path.join(save_dirpath, "loss.csv")
 inferenced_filepath = os.path.join(save_dirpath, "inferenced.csv")
+# CV
+## 全データを用いて学習を行う場合
+cv_type  = None # cv_type = config["CV"]
+## 直近のデータを用いて学習を行う場合
+# cv_type = "from_202102"
+# Metric
+metric = smape
+# Comment
+comment = "operation_test"
 
 # --- Preparation ---
 # 変数の定義
@@ -56,12 +68,18 @@ submission      = pd.read_csv(submission_filepath)
 # 設定ファイル関連
 with open(config_filepath, mode="rt", encoding="utf-8") as f:
 	config = json.load(f)
-# CVのやり方（とりあえず別途管理するまでは、Noneにする）
-cv_type  = None # cv_type = config["CV"]
-# 評価方法
-metric = smape
 # 結果保存場所の環境作成
 os.makedirs(save_dirpath, exist_ok=True)
+# 結果のコピー先のファイルパス（検討結果とコード）
+dt_now = datetime.datetime.now()
+now_month, now_day = str(dt_now.month).zfill(2), str(dt_now.day).zfill(2)
+now_hour, now_minute = str(dt_now.hour).zfill(2), str(dt_now.minute).zfill(2)
+if cv_type == None:
+    cv_type_comment = "None"
+else:
+    cv_type_comment = cv_type
+cp_path = f"../{now_month}{now_day}_{now_hour}{now_minute}_cv_{cv_type_comment}_{comment}"
+print(cp_path)
 
 # --- Main ---
 #群ごとに予測を実施
@@ -103,3 +121,5 @@ with open(loss_filepath, mode="w") as f:
 # predict.csv (いいやり方ではないと思う。。。とりあえずバリデーション期間が変わってもできるように)
 inference_df = pd.DataFrame.from_dict(inference_dict)
 inference_df.to_csv(inferenced_filepath)
+# save result
+shutil.copytree("../latest", cp_path)
