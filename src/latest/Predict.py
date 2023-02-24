@@ -45,7 +45,7 @@ test_filepath = os.path.join(data_folder, "test.csv")
 census_starter_filepath = os.path.join(data_folder, "census_starter.csv")
 submission_filepath = os.path.join(data_folder, "sample_submission.csv")
 config_filepath = "./config.json"
-save_dirpath = "./submit"
+save_dirpath = "./train"
 loss_filepath = os.path.join(save_dirpath, "loss.csv")
 inferenced_filepath = os.path.join(save_dirpath, "inferenced.csv")
 # Variable
