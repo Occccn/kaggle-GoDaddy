@@ -63,4 +63,41 @@ class CV:
             
             return train_index, val_index, submit_index
         
+        elif (self.cv_type == "submit_full_ver2"):
+            """
+            更新データを含んで、
+            全データを学習データとして用いて、予測
+            予測対象期間：
+            val: 1月
+            sub: 2,3,4月
+            """
+            # !! データの変更があった際は、参照インデックス要見直し
+            train_month = self.train["first_day_of_month"].values[:-6]  # 2022-12-01が-6までなので
+            val_month = self.train["first_day_of_month"].values[-6] # 2023-01-01想定
+            submit_month = self.train["first_day_of_month"].values[-5:-2] # 2023-02-01 - 2022-04-01 想定
             
+            train_index = self.train.query("first_day_of_month in @train_month").index
+            val_index = self.train.query("first_day_of_month in @val_month").index
+            submit_index = self.train.query("first_day_of_month in @submit_month").index
+            
+            return train_index, val_index, submit_index
+        
+        elif (self.cv_type == "submit_from202102_ver2"):
+            """
+            更新データを含んで、
+            全データを学習データとして用いて、予測
+            予測対象期間：
+            val: 1月
+            sub: 2,3,4月
+            """
+            # !! データの変更があった際は、参照インデックス要見直し
+            train_month = self.train["first_day_of_month"].values[18:-6]  # 2021/02 - 2022-12-01
+            val_month = self.train["first_day_of_month"].values[-6] # 2023-01-01想定
+            submit_month = self.train["first_day_of_month"].values[-5:-2] # 2023-02-01 - 2022-04-01 想定
+            
+            train_index = self.train.query("first_day_of_month in @train_month").index
+            val_index = self.train.query("first_day_of_month in @val_month").index
+            submit_index = self.train.query("first_day_of_month in @submit_month").index
+            
+            return train_index, val_index, submit_index
+        
