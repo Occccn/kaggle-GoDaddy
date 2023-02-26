@@ -30,6 +30,7 @@ def smape(y_pred, y_true):
 data_folder = "../../data/raw"
 train_filepath = os.path.join(data_folder, "train.csv")
 test_filepath = os.path.join(data_folder, "test.csv")
+revealed_test_filepath = os.path.join(data_folder, "revealed_test.csv")
 census_starter_filepath = os.path.join(data_folder, "census_starter.csv")
 submission_filepath = os.path.join(data_folder, "sample_submission.csv")
 config_filepath = "./config.json"
@@ -41,11 +42,14 @@ inferenced_filepath = os.path.join(save_dirpath, "inferenced.csv")
 # 変数の定義
 train           = pd.read_csv(train_filepath)
 test            = pd.read_csv(test_filepath)
+revealed_test   = pd.read_csv(revealed_test_filepath)
 census_starter  = pd.read_csv(census_starter_filepath)
 submission      = pd.read_csv(submission_filepath)
 
-test            = pd.merge(test,train[['cfips', 'county', 'state']].drop_duplicates(),how = 'left')
-train           = pd.concat([train,test]).reset_index(drop = True)
+train = pd.concat([train, revealed_test])
+test  = pd.merge(test,train[['cfips', 'county', 'state']].drop_duplicates(),how = 'left')
+test  = test[~test['first_day_of_month'].isin(['2022-11-01','2022-12-01'])]
+train = pd.concat([train,test]).reset_index(drop = True)
 
 # 設定ファイル関連
 with open(config_filepath, mode="rt", encoding="utf-8") as f:
@@ -62,8 +66,8 @@ with open('lgbconfig.yml', 'r') as yml:
     LGBCFG = yaml.load(yml, Loader=yaml.SafeLoader)
     
 
-VAL_DATE = ['2022/7/1']
-SUB_DATE = ['2022/8/1', '2022/9/1', '2022/10/1']
+VAL_DATE = ['2022/8/1']
+SUB_DATE = ['2022/9/1', '2022/10/1', '2022/11/1', '2022/12/1']
 model = LGBModel(LGBCFG)
 model.set_data(train)
 model.run(VAL_DATE + SUB_DATE)
@@ -96,8 +100,8 @@ loss.to_csv(loss_filepath, index = False)
 
 
 if  LGBCFG['mode'] == 'prediction':
-    VAL_DATE = ['2022/11/1']
-    SUB_DATE = ['2022/12/1', '2023/1/1', '2023/2/1']
+    VAL_DATE = ['2023/1/1']
+    SUB_DATE = ['2023/2/1', '2023/3/1', '2023/4/1', '2023/5/1']
     
     model = LGBModel(LGBCFG)
     model.set_data(train)
