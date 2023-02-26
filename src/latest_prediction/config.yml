@@ -1,1 +1,1 @@
-model_dir : ['0213_oshima_last', '0213_oshima_linear', '0213_oshima_lgb']
+model_dir : ['0226_lgb', '0226_update_linear', '0226_updatedata_lastmodel']
