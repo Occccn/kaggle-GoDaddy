@@ -41,6 +41,7 @@ def smape(y_pred, y_true):
 # Filepath
 data_folder = "../../data/raw"
 train_filepath = os.path.join(data_folder, "train.csv")
+revealed_test_filepath = os.path.join(data_folder, "revealed_test.csv")
 test_filepath = os.path.join(data_folder, "test.csv")
 census_starter_filepath = os.path.join(data_folder, "census_starter.csv")
 submission_filepath = os.path.join(data_folder, "sample_submission.csv")
@@ -50,23 +51,30 @@ loss_filepath = os.path.join(save_dirpath, "loss.csv")
 inferenced_filepath = os.path.join(save_dirpath, "inferenced.csv")
 # Variable
 train_cv_type = None
-submit_cv_type = "submit_full"
+submit_cv_type = "submit_full_ver2"
 
 # --- Preparation ---
 # 変数の定義
 train           = pd.read_csv(train_filepath)
+revealed_test   = pd.read_csv(revealed_test_filepath)
 test            = pd.read_csv(test_filepath)
 census_starter  = pd.read_csv(census_starter_filepath)
 submission      = pd.read_csv(submission_filepath)
 # データの用意
+## all data
 df_list = []
 for cfips in train["cfips"].unique():
-    train_cfips_df = train.loc[train["cfips"]==cfips, :]
-    test_cfips_df = test.loc[test["cfips"]==cfips, :]
+    train_cfips_df           = train.loc[train["cfips"]==cfips, :]
+    revealed_test_cfips_df   = revealed_test.loc[revealed_test["cfips"]==cfips, :]
+    # testのデータは、2022/11月から始まっており、revealed_testと11,12月の2ヶ月重複があるため
+    test_cfips_df            = test.loc[test["cfips"]==cfips, :][2:] 
     cfips_df = pd.concat([train_cfips_df, test_cfips_df])
     df_list.append(cfips_df)
 all_data = pd.concat(df_list)
 all_data.reset_index(drop=True, inplace=True)
+## train
+train = pd.concat([train, revealed_test])
+train.reset_index(drop=True, inplace=True)
 # 設定ファイル関連
 with open(config_filepath, mode="rt", encoding="utf-8") as f:
 	config = json.load(f)
