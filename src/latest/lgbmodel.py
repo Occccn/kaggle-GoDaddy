@@ -75,13 +75,13 @@ class LGBModel:
         target.loc[target['target'] == np.inf, 'target'] = -1
         
         #各種特徴量をマージ
-        feature_df2               = pd.merge(feature_df,diff_feature,on = 'cfips')
-        feature_df2               = pd.merge(feature_df2,lag_features[lag_features_col],on = 'row_id',how = 'inner')
-        feature_df3               = pd.merge(feature_df2,cfips_amount,on = 'cfips')
-        feature_df3               = pd.merge(feature_df3,rolling_features[rolling_features_col],on = 'row_id',how = 'inner')
-        feature_df3               = pd.merge(feature_df3,std_features[std_features_col],on = 'row_id',how = 'inner')
-        feature_df3               = pd.merge(feature_df3,target[['target','shift_target','microbusiness_density','row_id']] ,on = 'row_id',how = 'inner')
-        self.mart                 = feature_df3[feature_df3['first_day_of_month'] >= pd.to_datetime('2021/3/1')]
+        feature_df               = pd.merge(feature_df,diff_feature,on = 'cfips')
+        feature_df               = pd.merge(feature_df,lag_features[lag_features_col],on = 'row_id',how = 'inner')
+        feature_df               = pd.merge(feature_df,cfips_amount,on = 'cfips')
+        feature_df               = pd.merge(feature_df,rolling_features[rolling_features_col],on = 'row_id',how = 'inner')
+        feature_df               = pd.merge(feature_df,std_features[std_features_col],on = 'row_id',how = 'inner')
+        feature_df               = pd.merge(feature_df,target[['target','shift_target','microbusiness_density','row_id']] ,on = 'row_id',how = 'inner')
+        self.mart                 = feature_df[feature_df['first_day_of_month'] >= pd.to_datetime('2021/3/1')]
         self.mart['target']       = self.mart['target'].fillna(0)
         self.mart['shift_target'] = self.mart['shift_target'].fillna(0)
         

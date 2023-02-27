@@ -68,7 +68,8 @@ for cfips in train["cfips"].unique():
     revealed_test_cfips_df   = revealed_test.loc[revealed_test["cfips"]==cfips, :]
     # testのデータは、2022/11月から始まっており、revealed_testと11,12月の2ヶ月重複があるため
     test_cfips_df            = test.loc[test["cfips"]==cfips, :][2:] 
-    cfips_df = pd.concat([train_cfips_df, test_cfips_df])
+    cfips_df = pd.concat([train_cfips_df, revealed_test_cfips_df])
+    cfips_df = pd.concat([cfips_df, test_cfips_df])
     df_list.append(cfips_df)
 all_data = pd.concat(df_list)
 all_data.reset_index(drop=True, inplace=True)

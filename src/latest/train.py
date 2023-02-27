@@ -49,6 +49,7 @@ config_filepath = "./config.json"
 save_dirpath = "./train"
 loss_filepath = os.path.join(save_dirpath, "loss.csv")
 inferenced_filepath = os.path.join(save_dirpath, "inferenced.csv")
+revealed_test_filepath = os.path.join(data_folder, "revealed_test.csv")
 # CV
 ## 全データを用いて学習を行う場合
 cv_type  = None # cv_type = config["CV"]
@@ -62,9 +63,15 @@ comment = "operation_test"
 # --- Preparation ---
 # 変数の定義
 train           = pd.read_csv(train_filepath)
+revealed_test   = pd.read_csv(revealed_test_filepath)
 test            = pd.read_csv(test_filepath)
 census_starter  = pd.read_csv(census_starter_filepath)
 submission      = pd.read_csv(submission_filepath)
+
+train = pd.concat([train, revealed_test])
+train = train.sort_values('first_day_of_month')
+
+
 # 設定ファイル関連
 with open(config_filepath, mode="rt", encoding="utf-8") as f:
 	config = json.load(f)
