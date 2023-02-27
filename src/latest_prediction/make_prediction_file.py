@@ -63,4 +63,29 @@ sub = pd.merge(sub,pred_df[['row_id','pred_']],how = 'left',on = 'row_id')
 sub['pred_']= sub['pred_'].fillna(3.817671)
 sub = sub[['row_id','pred_']]
 sub.columns = ['row_id','microbusiness_density']
+
+
+
+COLS = ['GEO_ID','NAME','S0101_C01_026E']
+df2020 = pd.read_csv('../../data/raw/ACSST5Y2020.S0101-Data.csv',usecols=COLS)
+df2020 = df2020.iloc[1:]
+df2020['S0101_C01_026E'] = df2020['S0101_C01_026E'].astype('int')
+
+df2021 = pd.read_csv('../../data/raw/ACSST5Y2021.S0101-Data.csv',usecols=COLS)
+df2021 = df2021.iloc[1:]
+df2021['S0101_C01_026E'] = df2021['S0101_C01_026E'].astype('int')
+
+df2020['cfips'] = df2020['GEO_ID'].apply(lambda x: int(x.split('US')[-1]) )
+adult2020 = df2020.set_index('cfips').S0101_C01_026E.to_dict()
+
+df2021['cfips'] = df2021['GEO_ID'].apply(lambda x: int(x.split('US')[-1]) )
+adult2021 = df2021.set_index('cfips').S0101_C01_026E.to_dict()
+
+sub['cfips'] = sub['row_id'].apply(lambda x: int(x.split('_')[0]))
+sub['adult2020'] = sub['cfips'].map(adult2020)
+sub['adult2021'] = sub['cfips'].map(adult2021)
+sub.head()
+
+sub['microbusiness_density'] = sub['microbusiness_density'] * sub['adult2020'] / sub['adult2021']
+sub= sub.drop(['adult2020','adult2021','cfips'],axis=1)
 sub.to_csv('submission.csv',index = False)

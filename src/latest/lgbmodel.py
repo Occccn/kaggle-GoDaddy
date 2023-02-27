@@ -33,7 +33,7 @@ class LGBModel:
         ##lag特徴量
         lag_features     = self.train[self.train['first_day_of_month'] >= pd.to_datetime('2021/2/1')]
         lag_features_col =  ['row_id']
-        for shift_month in range(1,13):
+        for shift_month in range(1,6):
             lag_features[f'mb_dens_shift{shift_month}'] = lag_features.groupby(['cfips'])[['microbusiness_density']].shift(shift_month)
             lag_features_col.append(f'mb_dens_shift{shift_month}')
 
@@ -48,11 +48,11 @@ class LGBModel:
         #移動平均
         rolling_features     = self.train[self.train['first_day_of_month'] >= pd.to_datetime('2021/2/1')]
         rolling_features_col = ['row_id']
-        for i in range(1,2):
         # for i in range(1,6):
+        for i in range(1,3):
             DAYS_PRED = i+1
             # for size in [3, 6, 9, 12]:
-            for size in [3]:
+            for size in [3, 6]:
                 rolling_features[f"rolling_lag_mean_t{size}_shift{DAYS_PRED}"] = rolling_features.groupby(['cfips'])['microbusiness_density'].transform(lambda x: x.shift(DAYS_PRED).rolling(size).mean())
                 rolling_features_col.append(f"rolling_lag_mean_t{size}_shift{DAYS_PRED}")
                 
@@ -60,11 +60,11 @@ class LGBModel:
         #分散
         std_features     = self.train[self.train['first_day_of_month'] >= pd.to_datetime('2021/2/1')]
         std_features_col = ['row_id']
-        for i in range(1,2):
         # for i in range(1,6):
+        for i in range(1,3):
             DAYS_PRED = i+1
             # for size in [3, 6, 9, 12]:
-            for size in [3]:
+            for size in [3, 6]:
                 std_features[f"rolling_lag_std_t{size}_shift{DAYS_PRED}"] = std_features.groupby(['cfips'])['microbusiness_density'].transform(lambda x: x.shift(DAYS_PRED).rolling(size).std())
                 std_features_col.append(f"rolling_lag_std_t{size}_shift{DAYS_PRED}")
                 
