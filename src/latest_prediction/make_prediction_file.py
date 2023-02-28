@@ -67,11 +67,13 @@ sub.columns = ['row_id','microbusiness_density']
 
 
 COLS = ['GEO_ID','NAME','S0101_C01_026E']
-df2020 = pd.read_csv('../../data/raw/ACSST5Y2020.S0101-Data.csv',usecols=COLS)
+# df2020 = pd.read_csv('../../data/raw/ACSST5Y2020.S0101-Data.csv',usecols=COLS)
+df2020 = pd.read_csv('../../data/raw/ACSST5Y2020.S0101-Data.csv',usecols=COLS, low_memory=False)
 df2020 = df2020.iloc[1:]
 df2020['S0101_C01_026E'] = df2020['S0101_C01_026E'].astype('int')
 
-df2021 = pd.read_csv('../../data/raw/ACSST5Y2021.S0101-Data.csv',usecols=COLS)
+# df2021 = pd.read_csv('../../data/raw/ACSST5Y2021.S0101-Data.csv',usecols=COLS)
+df2021 = pd.read_csv('../../data/raw/ACSST5Y2021.S0101-Data.csv',usecols=COLS, low_memory=False)
 df2021 = df2021.iloc[1:]
 df2021['S0101_C01_026E'] = df2021['S0101_C01_026E'].astype('int')
 
