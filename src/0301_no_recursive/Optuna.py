@@ -6,7 +6,7 @@ import os
 import yaml
 from tqdm import tqdm
 
-from lgbmodel import LGBModel
+from lgbmodel_no_recursive import LGBModel
 
 # tmp
 import warnings
@@ -32,7 +32,7 @@ def smape(y_pred, y_true):
 
 # --- Set Paramters ---
 # *********
-n_trials = 100
+n_trials = 2
 # **********
 data_folder = "../../data/raw"
 train_filepath = os.path.join(data_folder, "train.csv")
@@ -94,55 +94,3 @@ for i in range(len(tmp_trial_result)):
 param_result_df = pd.DataFrame().from_dict(param_result_dict)
 param_result_df.to_csv(result_optuna_param_filepath)
    
-# VAL_DATE = ['2022/8/1']
-# SUB_DATE = ['2022/9/1', '2022/10/1', '2022/11/1', '2022/12/1']
-# model = LGBModel(LGBCFG)
-# model.set_data(train)
-# model.run(VAL_DATE + SUB_DATE)
-# # --- Post ---
-# # loss.csv
-# tmp = []
-# tmp2 = []
-# print('Calculate and save loss')
-
-# ans_val  = train[( pd.to_datetime(train['first_day_of_month']).isin(VAL_DATE))]
-# ans_sub  = train[( pd.to_datetime(train['first_day_of_month']).isin(SUB_DATE))]
-# pred_val = model.train[( pd.to_datetime(model.train['first_day_of_month']).isin(VAL_DATE))]
-# pred_sub = model.train[( pd.to_datetime(model.train['first_day_of_month']).isin(SUB_DATE))]
-
-# for cfip in tqdm(train['cfips'].unique()):
-#     tmp2.append(cfip)
-#     val_loss = smape(ans_val.loc[(ans_val['cfips']== cfip)]['microbusiness_density'].values,
-#                     pred_val.loc[(pred_val['cfips']== cfip)]['microbusiness_density'].values)
-#     sub_loss = smape(ans_sub.loc[(train['cfips']== cfip)]['microbusiness_density'].values,
-#                     pred_sub.loc[(pred_sub['cfips']== cfip)]['microbusiness_density'].values)
-#     tmp2.append(val_loss)
-#     tmp2.append(sub_loss)
-#     tmp.append(tmp2)
-#     tmp2 = []
-    
-
-# loss = pd.DataFrame(tmp)
-# loss.columns = ['cfips', 'val_loss', 'sub_loss']
-# loss.to_csv(loss_filepath, index = False)
-
-
-# if  LGBCFG['mode'] == 'prediction':
-#     VAL_DATE = ['2023/1/1']
-#     SUB_DATE = ['2023/2/1', '2023/3/1', '2023/4/1', '2023/5/1']
-    
-#     model = LGBModel(LGBCFG)
-#     model.set_data(train)
-#     model.run(VAL_DATE + SUB_DATE)
-
-
-
-
-
-
-# print('Save inference')
-# inference_df = pd.concat([model.train.loc[model.train['first_day_of_month'].isin(VAL_DATE),['microbusiness_density']].reset_index(drop = True).T] + 
-#                         [model.train.loc[model.train['first_day_of_month'].isin([pd.to_datetime(sub)]),['microbusiness_density']].reset_index(drop = True).T for sub in SUB_DATE])
-# # predict.csv (いいやり方ではないと思う。。。とりあえずバリデーション期間が変わってもできるように)
-# inference_df.columns = model.mart_val['cfips'].values
-# inference_df.to_csv(inferenced_filepath, index = False)
