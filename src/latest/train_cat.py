@@ -6,7 +6,7 @@ import os
 import yaml
 from tqdm import tqdm
 
-from lgbmodel import LGBModel
+from catmodel import CATModel
 
 # --- Define Function ---
 # ----- Metric -----
@@ -69,7 +69,7 @@ with open('lgbconfig.yml', 'r') as yml:
 
 VAL_DATE = ['2022/8/1']
 SUB_DATE = ['2022/9/1', '2022/10/1', '2022/11/1', '2022/12/1']
-model = LGBModel(LGBCFG)
+model = CATModel(LGBCFG)
 model.set_data(train)
 model.run(VAL_DATE + SUB_DATE)
 # --- Post ---
@@ -149,7 +149,7 @@ if  LGBCFG['mode'] == 'prediction':
     VAL_DATE = ['2023/1/1']
     SUB_DATE = ['2023/2/1', '2023/3/1', '2023/4/1', '2023/5/1']
     
-    model = LGBModel(LGBCFG)
+    model = CATModel(LGBCFG)
     model.set_data(train)
     model.run(VAL_DATE + SUB_DATE)
 
