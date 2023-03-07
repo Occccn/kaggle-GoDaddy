@@ -6,7 +6,7 @@ import os
 import yaml
 from tqdm import tqdm
 
-from lgbmodel import LGBModel
+from lgbmodel_no_recursive import LGBModel
 
 # --- Define Function ---
 # ----- Metric -----
@@ -99,6 +99,8 @@ loss = pd.DataFrame(tmp)
 loss.columns = ['cfips', 'val_loss', 'sub_loss']
 loss.to_csv(loss_filepath, index = False)
 
+
+
 train['first_day_of_month'] = pd.to_datetime(train['first_day_of_month'])
 train_period = train[(train['first_day_of_month'] >= pd.to_datetime('2021/3/1')) & (train['first_day_of_month'] <= pd.to_datetime('2022/12/1'))]
 
@@ -143,8 +145,8 @@ for cfip in tqdm(train['cfips'].unique()):
 loss = pd.DataFrame(tmp)
 loss.columns = ['cfips', 'val_loss', 'sub_loss']
 loss.to_csv(loss_last_filepath, index = False)  
-
-
+    
+    
 if  LGBCFG['mode'] == 'prediction':
     VAL_DATE = ['2023/1/1']
     SUB_DATE = ['2023/2/1', '2023/3/1', '2023/4/1', '2023/5/1']
@@ -156,11 +158,9 @@ if  LGBCFG['mode'] == 'prediction':
 
 
 
-
-
 print('Save inference')
-inference_df = pd.concat([model.train.loc[model.train['first_day_of_month'].isin(VAL_DATE),['microbusiness_density']].reset_index(drop = True).T] + 
-                        [model.train.loc[model.train['first_day_of_month'].isin([pd.to_datetime(sub)]),['microbusiness_density']].reset_index(drop = True).T for sub in SUB_DATE])
+inference_df = pd.concat([model.train_copy.loc[model.train_copy['first_day_of_month'].isin(VAL_DATE),['microbusiness_density']].reset_index(drop = True).T] + 
+                        [model.train_copy.loc[model.train_copy['first_day_of_month'].isin([pd.to_datetime(sub)]),['microbusiness_density']].reset_index(drop = True).T for sub in SUB_DATE])
 # predict.csv (いいやり方ではないと思う。。。とりあえずバリデーション期間が変わってもできるように)
 inference_df.columns = model.mart_val['cfips'].values
 inference_df.to_csv(inferenced_filepath, index = False)
