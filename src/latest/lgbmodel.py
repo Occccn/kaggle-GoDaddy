@@ -161,7 +161,7 @@ class LGBModel:
             'max_depth': trial.suggest_int("max_depth", 3, 8),
             'min_child_samples': trial.suggest_int("min_child_samples", 30, 200),
             'force_col_wise': True,
-            'num_iterations': trial.suggest_int('num_iterations', 100, 1000),
+            'num_iterations': trial.suggest_int('num_iterations', 100, 600),
             "verbose":-1
             }
             
@@ -171,13 +171,15 @@ class LGBModel:
             ## Period1
             val_date1 = ['2022/8/1']
             sub_date1 = ['2022/9/1', '2022/10/1', '2022/11/1', '2022/12/1']
+            self.set_data(self.org_train)
             self.run(val_date1 + sub_date1)
-            loss_info_list1 = calc_loss(val_date1, sub_date1)
+            loss_info_list1 = calc_loss(val_date1, sub_date1[1:])
             ## Period2
             val_date2 = ["2022/3/1"]
             sub_date2 = ["2022/4/1", "2022/5/1", "2022/6/1", '2022/7/1']
+            self.set_data(self.org_train)
             self.run(val_date2 + sub_date2)
-            loss_info_list2 = calc_loss(val_date2, sub_date2)
+            loss_info_list2 = calc_loss(val_date2, sub_date2[1:])
             # metric
             val_loss1_list = []
             sub_loss1_list = []
