@@ -1,0 +1,21 @@
+# Period
+mode : 'prediction'
+
+# Params
+params :  {
+            'objective'        : 'regression', 
+            'metric'           : 'mae',
+            'lambda_l1'        : 0.0015175503681944154,
+            'lambda_l2'        : 2.7776745985791927e-05,
+            'num_leaves'       : 121,
+            'learning_rate'    : 0.0010182256962135918,
+            'max_depth'        : 5,
+            'min_child_samples': 35,
+            'force_col_wise'   : True,
+            'num_iterations'   : 117,
+        #     'early_stopping_round':100,
+        #     'boosting' : boosting_type,
+        #     'feature_fraction': trial.suggest_uniform('feature_fraction', 0.1, 0.4),
+        #     #'bagging_fraction': trial.suggest_uniform('bagging_fraction', 0.4, 1.0),
+        #     #'bagging_freq': trial.suggest_int('bagging_freq', 1, 30),
+        }
