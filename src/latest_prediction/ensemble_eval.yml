@@ -1,0 +1,2 @@
+model_dir : ['0308_lgb_mae_no_recursive', '0308_lgb_mape_no_recursive', '0308_cat_mape_no_recursive']
+rate : [2, 1, 1]
