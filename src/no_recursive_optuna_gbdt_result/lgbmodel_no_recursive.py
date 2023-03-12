@@ -156,7 +156,7 @@ class LGBModel:
                 # tmp.append(tmp2)
                 # tmp2 = []
                 loss_info_list.append([cfip, val_loss, sub_loss])
-                
+            
             return loss_info_list
             
         def objective(trial):
@@ -183,13 +183,13 @@ class LGBModel:
             sub_date1 = ['2022/9/1', '2022/10/1', '2022/11/1', '2022/12/1']
             self.set_data(self.org_train)
             self.run(val_date1 + sub_date1)
-            loss_info_list1 = calc_loss(val_date1, sub_date1)
+            loss_info_list1 = calc_loss(val_date1, sub_date1[1:])
             ## Period2
             val_date2 = ["2022/3/1"]
             sub_date2 = ["2022/4/1", "2022/5/1", "2022/6/1", '2022/7/1']
             self.set_data(self.org_train)
             self.run(val_date2 + sub_date2)
-            loss_info_list2 = calc_loss(val_date2, sub_date2)
+            loss_info_list2 = calc_loss(val_date2, sub_date2[1:])
             # metric
             val_loss1_list = []
             sub_loss1_list = []
