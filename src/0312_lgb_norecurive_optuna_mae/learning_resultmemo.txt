@@ -1,0 +1,2 @@
+sub_loss_mean:3.104727339582769
+sub_loss_last_mean:3.0935682781456446
