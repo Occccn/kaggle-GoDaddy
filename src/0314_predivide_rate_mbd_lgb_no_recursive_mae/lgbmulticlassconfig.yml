@@ -1,0 +1,22 @@
+# Period
+mode : 'prediction'
+
+# Params
+params :  {
+            'objective'        : 'multiclass', 
+            'metric'           : 'multi_logloss',
+            'lambda_l1'        : 2,
+            'lambda_l2'        : 5,
+            'num_leaves'       : 40,
+            'learning_rate'    : 0.005,
+            'max_depth'        : 8,
+            'min_child_samples': 150,
+            'force_col_wise'   : True,
+            'num_iterations'   : 100,
+            'num_class'        : 5,
+        #     'early_stopping_round':100,
+        #     'boosting' : boosting_type,
+        #     'feature_fraction': trial.suggest_uniform('feature_fraction', 0.1, 0.4),
+        #     #'bagging_fraction': trial.suggest_uniform('bagging_fraction', 0.4, 1.0),
+        #     #'bagging_freq': trial.suggest_int('bagging_freq', 1, 30),
+        }
